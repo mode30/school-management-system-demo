@@ -14,14 +14,21 @@ struct Person {
     courses: Vec<String>,
     // department: Departments,
     department: String,
+    role: Role,
 }
+
+#[allow(dead_code)]
 enum AccessLevel {
     StudentOnly,
     StaffOnly,
     AdminOnly,
     Public,
 }
-enum Staffs {
+
+
+#[allow(dead_code)]
+#[derive(Debug, Clone)]
+enum Role {
     Student,
     Teacher,
     Staff,
@@ -29,6 +36,7 @@ enum Staffs {
 }
 
 
+#[allow(dead_code)]
 #[derive(Debug)]
 struct Student {
     person: Person,
@@ -36,11 +44,15 @@ struct Student {
     attendance_percentage: f64,
 }
 
+
+#[allow(dead_code)]
 struct Teacher {
     person: Person,
     years_experience: u8,
     salary: f64,
 }
+
+#[allow(dead_code)]
 struct Staff {
     person: Person,
     department: String,
@@ -55,20 +67,56 @@ fn main() {
     println!("Hello, world!");
 
     let student_1 = Student::student_new(person_1, Some(33), 89.0);
-    println!("student 1:{}",student_1);
+    println!("student 1:{}", student_1);
 }
 
+
+#[allow(dead_code)]
 impl Person {
-    fn new_person(name: String, id: u32, courses: Vec<String>, department: String) -> Self {
+    fn new_person(
+        name: String,
+        id: u32,
+        courses: Vec<String>,
+        department: String,
+        role: Role,
+    ) -> Self {
         Self {
             name,
             id,
             courses,
             department,
+            role,
         }
     }
 }
 
+
+#[allow(dead_code)]
+impl Teacher {
+    fn new(person: Person, years_experience: u8, salary: f64) -> Self {
+        Self {
+            person,
+            years_experience,
+            salary,
+        }
+    }
+
+    fn teacher_name(&self) -> &str {
+        &self.person.name
+    }
+    // fn teacher_id(&self) -> u32 {
+    //     self.person.id
+    // }
+    // fn teacher_role(&self) -> Role {
+    //     self.person.role.clone()
+    // }
+    fn teacher_introduce(&self) {
+        println!("{}", self)
+    }
+}
+
+
+#[allow(dead_code)]
 impl Student {
     fn student_new(person: Person, grade: Option<u8>, attendance_percentage: f64) -> Self {
         Self {
@@ -76,6 +124,40 @@ impl Student {
             grade,
             attendance_percentage,
         }
+    }
+    fn student_name(&self) -> &str {
+        &self.person.name
+    }
+    fn student_id(&self) -> u32 {
+        self.person.id
+    }
+    fn student_role(&self) -> Role {
+        self.person.role.clone()
+    }
+    fn introduce(&self) {
+        println!("{}", self)
+    }
+}
+
+#[allow(dead_code)]
+impl Staff{
+
+    fn new(person:Person,department:String,salary:f64)->Self{
+        Self { person, department, salary }
+    }
+    fn staff_name(&self)->&str{
+        &self.person.name
+    }
+    fn staff_id(&self)->u32{
+        self.person.id
+    }
+    fn staff_role(&self)->Role{
+        self.person.role.clone()
+
+    }
+
+    fn introduce(self){
+        println!("infomation:{}",self)
     }
 }
 
@@ -87,6 +169,7 @@ impl Default for Person {
             id: 0,
             courses: vec!["Mathematics".to_owned(), "English".to_owned()],
             department: String::from("Engineering"),
+            role: Role::Student,
             // department: Departments::Business,
         }
     }
@@ -105,16 +188,25 @@ impl fmt::Display for Student {
             "Student info:\nstudent:{}\ngrade:{}\nattendance:{}\n",
             self.person,
             self.grade.unwrap_or_default(),
+            // match self.grade{
+            // Some(person_grade)=>println!("grade:{}",person_grade),
+
+            // Some(person_grade)=>person_grade.to_string(),
+            // None=>eprint,
+            //
+            // Some(person_grade)=>person_grade,
+            // None=>eprint,
+            // self.grade.unwrap_or_default(),
             self.attendance_percentage
         )
     }
 }
 
-
-impl fmt::Display for Person{
-    fn fmt(&self,f:&mut fmt::Formatter<'_>)->fmt::Result{
+impl fmt::Display for Person {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
-            f,"Person info:name:{}\nid:{}\ncourse:{}\ndepartment:{}\n",
+            f,
+            "Person info:name:{}\nid:{}\ncourse:{}\ndepartment:{}\n",
             self.name,
             self.id,
             self.courses.join(","),
@@ -122,3 +214,103 @@ impl fmt::Display for Person{
         )
     }
 }
+
+impl fmt::Display for Teacher {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Teacher information\n
+person:{}\nyears of experience:{}\nsalary:{}",
+            self.person, self.years_experience, self.salary
+        )
+    }
+}
+
+impl fmt::Display for Staff {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Staffs information:\n{}\ndepartment:{}\n,salary:{}\n",
+            self.person, self.department, self.salary
+        )
+    }
+}
+
+
+
+
+
+#[allow(dead_code)]
+trait PersonInformation{
+    fn print_id_card(&self);
+    fn name(&self)->&str;
+    fn id(&self)->u32;
+    fn courses(&self)->Vec<String>;
+    fn department(&self)->String;
+    fn roles(&self)->Role;
+}
+
+
+
+
+
+
+
+
+
+
+impl PersonInformation for Staff{
+    fn print_id_card(&self) {
+        println!("id information:{}",self)
+    }
+    fn name(&self)->&str{
+        &self.person.name
+        // format!("Teacher name:{}",&self.person.name)
+    }
+    fn id(&self)->u32{
+        self.person.id
+    }
+    fn courses(&self)->Vec<String> {
+        self.person.courses.clone()
+    }
+    fn department(&self)->String{
+        self.person.department.clone()
+    }
+
+    fn roles(&self)->Role{
+        self.person.role.clone()
+    }
+
+}
+
+
+
+impl PersonInformation for Teacher{
+    fn print_id_card(&self) {
+        println!("id information:{}",self)
+    }
+    fn name(&self)->&str{
+        &self.person.name
+        // format!("Teacher name:{}",&self.person.name)
+    }
+    fn id(&self)->u32{
+        self.person.id
+    }
+    fn courses(&self)->Vec<String> {
+        self.person.courses.clone()
+    }
+    fn department(&self)->String{
+        self.person.department.clone()
+    }
+
+    fn roles(&self)->Role{
+        self.person.role.clone()
+    }
+
+}
+// impl PersonInformation for  Student{
+
+// }
+// impl PersonInformation for Staff{
+
+// }
