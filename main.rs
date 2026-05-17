@@ -1,4 +1,5 @@
 use core::fmt;
+use std::io::{self};
 
 // #[derive(Debug,Default)]
 // enum Departments {
@@ -25,7 +26,6 @@ enum AccessLevel {
     Public,
 }
 
-
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 enum Role {
@@ -35,15 +35,14 @@ enum Role {
     Principal,
 }
 
-
 #[allow(dead_code)]
 #[derive(Debug)]
 struct Student {
     person: Person,
     grade: Option<u8>,
     attendance_percentage: f64,
+    area: Vec<String>,
 }
-
 
 #[allow(dead_code)]
 struct Teacher {
@@ -61,15 +60,41 @@ struct Staff {
 
 fn main() {
     // let person_1 = Person::new_person("benjamin".to_owned(), 1);
+    let _student_areas = vec![
+        String::from("Mess hall"),
+        String::from("Bathroom"),
+        String::from("Toilet"),
+        String::from("Principle office"),
+        String::from("Club hall"),
+        String::from("Doctors office"),
+    ];
+
+    let _staffs_areas = vec![
+        String::from("Mess hall"),
+        String::from("Bathroom"),
+        String::from("Toilet"),
+        String::from("Principle office"),
+        String::from("Club hall"),
+        String::from("Doctors office"),
+    ];
+    let _teacher_areas = vec![
+        String::from("Mess hall"),
+        String::from("Bathroom"),
+        String::from("Toilet"),
+        String::from("Principle office"),
+        String::from("Club hall"),
+        String::from("Doctors office"),
+    ];
     let person_1 = Person::default();
     println!("{:?}", person_1);
 
     println!("Hello, world!");
 
-    let student_1 = Student::student_new(person_1, Some(33), 89.0);
+    // let student_areas=Vec::new();
+    // student_areas.push("")
+    let student_1 = Student::student_new(person_1, Some(33), 89.0, _student_areas);
     println!("student 1:{}", student_1);
 }
-
 
 #[allow(dead_code)]
 impl Person {
@@ -89,7 +114,6 @@ impl Person {
         }
     }
 }
-
 
 #[allow(dead_code)]
 impl Teacher {
@@ -115,49 +139,96 @@ impl Teacher {
     }
 }
 
-
 #[allow(dead_code)]
 impl Student {
-    fn student_new(person: Person, grade: Option<u8>, attendance_percentage: f64) -> Self {
+    fn student_new(
+        person: Person,
+        grade: Option<u8>,
+        attendance_percentage: f64,
+        area: Vec<String>,
+    ) -> Self {
         Self {
             person,
             grade,
             attendance_percentage,
+            area,
         }
     }
-    fn student_name(&self) -> &str {
-        &self.person.name
+    fn areas_to_access(&self) -> Vec<String> {
+        self.area.clone()
     }
-    fn student_id(&self) -> u32 {
-        self.person.id
+    fn display_areas(&self) {
+        println!("areas to explore:{:#?}", self.area)
     }
-    fn student_role(&self) -> Role {
-        self.person.role.clone()
+    // fn can_access(&self,areas:Vec<String>,area_name:String)->Result<Option<bool>,io::Error>{
+    // fn can_access(&self,areas:Vec<String>,area_name:String)->Result<Option<String>,io::Error>{
+    // fn can_access(&self,areas:Vec<String>,area_name:String)->Result<bool,io::Error>{
+    fn can_access(&self, area_name: String) -> Result<(), io::Error> {
+        if area_name.is_empty() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "cannot be empty",
+            ));
+        }
+        // let result=areas.iter().find(|&search| *search ==area_name);
+        let result = self.area.iter().find(|&search| *search == area_name);
+        match result {
+            Some(allowed) => {
+                println!("allowed\n{}", allowed);
+                Ok(())
+                // print!("allowed\n,{}",allowd);
+                // std::io::stdout().flush()?;
+            }
+            None => {
+                println!("not found");
+
+                Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    format!("{} searched:,area not found", area_name),
+                ))
+            }
+        }
+
+        // print!("found:{}\n",result);
+        // std::io::stdout().flush()?;
+
+        // result(area_name)
     }
-    fn introduce(&self) {
-        println!("{}", self)
-    }
+    // fn student_name(&self) -> &str {
+    //     &self.person.name
+    // }
+    // fn student_id(&self) -> u32 {
+    //     self.person.id
+    // }
+    // fn student_role(&self) -> Role {
+    //     self.person.role.clone()
+    // }
+    // fn introduce(&self) {
+    //     println!("{}", self)
+    // }
 }
 
 #[allow(dead_code)]
-impl Staff{
-
-    fn new(person:Person,department:String,salary:f64)->Self{
-        Self { person, department, salary }
+impl Staff {
+    fn new(person: Person, department: String, salary: f64) -> Self {
+        Self {
+            person,
+            department,
+            salary,
+        }
     }
-    fn staff_name(&self)->&str{
+    fn staff_name(&self) -> &str {
         &self.person.name
     }
-    fn staff_id(&self)->u32{
+    fn staff_id(&self) -> u32 {
         self.person.id
     }
-    fn staff_role(&self)->Role{
+    fn staff_role(&self) -> Role {
         self.person.role.clone()
-
     }
 
-    fn introduce(self){
-        println!("infomation:{}",self)
+    fn introduce(self) {
+        println!("infomation:{}", self)
     }
 }
 
@@ -236,77 +307,60 @@ impl fmt::Display for Staff {
     }
 }
 
-
-
-
-
 #[allow(dead_code)]
-trait PersonInformation{
+trait PersonInformation {
     fn print_id_card(&self);
-    fn name(&self)->&str;
-    fn id(&self)->u32;
-    fn courses(&self)->Vec<String>;
-    fn department(&self)->String;
-    fn roles(&self)->Role;
+    fn name(&self) -> &str;
+    fn id(&self) -> u32;
+    fn courses(&self) -> Vec<String>;
+    fn department(&self) -> String;
+    fn roles(&self) -> Role;
 }
 
-
-
-
-
-
-
-
-
-
-impl PersonInformation for Staff{
+impl PersonInformation for Staff {
     fn print_id_card(&self) {
-        println!("id information:{}",self)
+        println!("id information:{}", self)
     }
-    fn name(&self)->&str{
+    fn name(&self) -> &str {
         &self.person.name
         // format!("Teacher name:{}",&self.person.name)
     }
-    fn id(&self)->u32{
+    fn id(&self) -> u32 {
         self.person.id
     }
-    fn courses(&self)->Vec<String> {
+    fn courses(&self) -> Vec<String> {
         self.person.courses.clone()
     }
-    fn department(&self)->String{
+    fn department(&self) -> String {
         self.person.department.clone()
     }
 
-    fn roles(&self)->Role{
+    fn roles(&self) -> Role {
         self.person.role.clone()
     }
-
 }
 
-
-
-impl PersonInformation for Teacher{
+impl PersonInformation for Teacher {
     fn print_id_card(&self) {
-        println!("id information:{}",self)
+        println!("id information:{}", self)
     }
-    fn name(&self)->&str{
+    fn name(&self) -> &str {
         &self.person.name
         // format!("Teacher name:{}",&self.person.name)
     }
-    fn id(&self)->u32{
+    fn id(&self) -> u32 {
         self.person.id
     }
-    fn courses(&self)->Vec<String> {
+    fn courses(&self) -> Vec<String> {
         self.person.courses.clone()
     }
-    fn department(&self)->String{
+    fn department(&self) -> String {
         self.person.department.clone()
     }
 
-    fn roles(&self)->Role{
+    fn roles(&self) -> Role {
         self.person.role.clone()
     }
-
 }
 // impl PersonInformation for  Student{
 
@@ -314,3 +368,26 @@ impl PersonInformation for Teacher{
 // impl PersonInformation for Staff{
 
 // }
+
+fn user_input(prompt: &str) -> Result<String, io::Error> {
+    println!(":{}", prompt);
+    let mut user_input = String::new();
+    std::io::stdin().read_line(&mut user_input)?;
+    if user_input.is_empty() {
+        return Err(io::Error::new(io::ErrorKind::InvalidData, "nan"));
+    }
+    let user_input = user_input.trim();
+
+    Ok(user_input.to_string())
+}
+
+fn atoi32() -> Result<i32, io::Error> {
+    let buffer = user_input("enter number")?;
+    let buffer: i32 = buffer
+        .trim()
+        .parse()
+        .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, format!("nan")))?;
+
+    Ok(buffer)
+    // Ok(buffer)
+}
